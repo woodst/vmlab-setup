@@ -18,3 +18,13 @@
 # ======================================================
 
 
+# ======================================================
+# Script Configuration Data
+# ------------------------------------------------------
+# F-010
+# ======================================================
+
+# Installation and logging information
+loglocation="woodst@192.168.1.21:vmlab/install/"
+localdirectory="install/"
+logfilename="setuplog.log.txt"
