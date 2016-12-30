@@ -96,15 +96,29 @@ returnCatalog() {
     echo
     echo " Macro Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
-    echo " fullSetupset up the entire VMLab from nothing"
+    echo " fullSetup                      set up the entire VMLab from nothing"
     echo 
     echo " Discrete functions (run by the macro functions above):"
     echo " --------------------------------------------------------------------------------------------------------"
-    echo " mountInstallDirectorycreate a local directory with a remote mount to the log directory"
-    echo " logWrite to the log file.  See documentation for usage."
+    echo " mountInstallDirectory          create a local directory with a remote mount to the log directory"
+    echo " log                            Write to the log file.  See documentation for usage."
     echo ""
 }
 
+
+# ========================================================
+# Full Setup 
+# --------------------------------------------------------
+# F-020 (introduced on HF-010)
+# --------------------------------------------------------
+# Performs a complete setup of the VMLab, from nothing
+# Use clean before running this script.
+# ========================================================
+fullSetup() {
+    
+    # 0001 Start by making an installation directory and mounting the remote directory
+    log 0001 mountInstallDirectory "Installation Directory Mounted "
+}
 
 
 # ======================================================
