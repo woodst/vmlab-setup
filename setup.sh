@@ -35,6 +35,9 @@ keymappath="/usr/share/kbd/keymaps/i386/qwerty/us.map.gz"
 # Keymap is the name of the key mapping file 
 keymap="us.map.gz"
 
+# timezone
+timezone="UTC"
+
 
 
 # ======================================================
@@ -113,6 +116,29 @@ fi
 }
 
 
+# =======================================================
+# setupTime
+# -------------------------------------------------------
+# F-040
+# -------------------------------------------------------
+# Set the Date and Time:
+# We want NTP to govern the the actual date and time, 
+# but we need to tell it which timezone we want.
+# ###################################################
+setupTime() {
+
+if [[ $(type timedatectl) != "" ]] 
+then
+    timedatectl set-timezone $timezone
+    timedatectl set-ntp true
+    timedatectl status
+else
+    echo "[setup.sh] something went wrong with timedatectl"
+fi
+
+}
+
+
 
 # =======================================================
 # returnCatalog
@@ -148,11 +174,14 @@ returnCatalog() {
 # ========================================================
 fullSetup() {
     
-    # 0001 Start by making an installation directory and mounting the remote directory
-    log 0001 mountInstallDirectory "Installation Directory Mounted "
+    # 0010 Start by making an installation directory and mounting the remote directory
+    log 0010 mountInstallDirectory "Installation Directory Mounted "
 
-    # 0002 Set the system time (F-030)
-    log 0002 setupKeyboard "Keyboard mapping set "
+    # 0020 Set the system time (F-030)
+    log 0020 setupKeyboard "Keyboard mapping set "
+
+    # 0030 Set the system time
+    log 0030 setupTime "System time set "
 
 }
 
