@@ -29,6 +29,13 @@ loglocation="woodst@192.168.1.21:vmlab/install/"
 localdirectory="install/"
 logfilename="setuplog.log.txt"
 
+# keymappath provides a full path and file name
+keymappath="/usr/share/kbd/keymaps/i386/qwerty/us.map.gz"
+
+# Keymap is the name of the key mapping file 
+keymap="us.map.gz"
+
+
 
 # ======================================================
 # mountInstallDirectory
@@ -83,6 +90,31 @@ echo "ID ,Function ,Description ,DateTime ,Result" >> $localdirectory$logfilenam
 
 
 # =======================================================
+# setUpKeyboard
+# -------------------------------------------------------
+# F-030
+# -------------------------------------------------------
+# Load the keyboard mapping file:
+# Verify the mapping file exists, is readable and then 
+# apply it to the current setup.
+# -------------------------------------------------------
+setupKeyboard() {
+
+if [[ $(type loadkeys) != "" && $(type localectl) != "" ]]
+then
+    echo "keymap file exists at $keymappath ... setting keymap" 
+    loadkeys $keymap
+    localectl set-keymap --no-convert $keymap
+else
+    echo "[setup.sh] something went wrong with keyboard mapping."
+    return 1;
+fi
+
+}
+
+
+
+# =======================================================
 # returnCatalog
 # -------------------------------------------------------
 # F-020
@@ -118,6 +150,10 @@ fullSetup() {
     
     # 0001 Start by making an installation directory and mounting the remote directory
     log 0001 mountInstallDirectory "Installation Directory Mounted "
+
+    # 0002 Set the system time (F-030)
+    log 0002 setupKeyboard "Keyboard mapping set "
+
 }
 
 
