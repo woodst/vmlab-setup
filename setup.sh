@@ -160,6 +160,8 @@ returnCatalog() {
     echo " --------------------------------------------------------------------------------------------------------"
     echo " mountInstallDirectory          create a local directory with a remote mount to the log directory"
     echo " log                            Write to the log file.  See documentation for usage."
+    echo " setupKeyboard                  Set up the local keyboard used during installation"
+    echo " setupTime                      Set System Time, Timezone, use of NTP"
     echo ""
 }
 
