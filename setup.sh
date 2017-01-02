@@ -168,6 +168,33 @@ clean () {
 
 }
 
+# =========================================================
+# DiskMap
+# ---------------------------------------------------------
+# F-060
+# ---------------------------------------------------------
+# Helper function that generates a data file of all
+# onboard disks and places diskmap.txt on the remote
+# installation drive.  See the documentation for file
+# format information.  DiskMap will mount the remote 
+# drive if it doesn't already exist.
+# =========================================================
+diskMap() {
+if [ -e "$localdirectory" ]
+then
+    if [[ $(type lsblk) != "" ]]
+    then
+        mapfile="drivelist.txt"
+        lsblk -b --output "NAME,HOTPLUG,MODEL,SERIAL,SIZE,WWN,HCTL,MAJ:MIN,TRAN,REV" >> "$localdirectory$mapfile"
+    else
+        echo "lsblk is not installed"
+    fi
+else
+    mountInstallDirectory
+    diskMap
+fi
+}
+
 
 
 # =======================================================
@@ -196,6 +223,7 @@ returnCatalog() {
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
+    echo " diskmap                        creates a text file dump of all physical drives on this system"
     echo 
 }
 
