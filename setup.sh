@@ -141,6 +141,36 @@ fi
 
 
 # =======================================================
+# clean
+# -------------------------------------------------------
+# F-050
+# -------------------------------------------------------
+# Archive log files into a date/time-labeled directory,
+# unmount and remove the install directory and any 
+# other files, with the exception of this script.
+# =======================================================
+clean () {
+    if [[ -e "$localdirectory" ]]
+    then
+        echo "Cleaning up...\n"
+
+        # organize any previous installation files
+        backupDir=$(date "+install.%y.%m.%d.%H.%M.%s")
+        mkdir $localdirectory/$backupDir
+        mv $localdirectory/*.log.txt $localdirectory/$backupDir
+
+        # unmount and remove the install directory
+        umount $localdirectory
+        rmdir $localdirectory
+    else
+        echo "Nothing to clean."
+    fi
+
+}
+
+
+
+# =======================================================
 # returnCatalog
 # -------------------------------------------------------
 # F-020
@@ -158,11 +188,15 @@ returnCatalog() {
     echo 
     echo " Discrete functions (run by the macro functions above):"
     echo " --------------------------------------------------------------------------------------------------------"
+    echo " clean                          archive artifacts and unmount/remove the remote installation directory"
     echo " mountInstallDirectory          create a local directory with a remote mount to the log directory"
     echo " log                            Write to the log file.  See documentation for usage."
     echo " setupKeyboard                  Set up the local keyboard used during installation"
     echo " setupTime                      Set System Time, Timezone, use of NTP"
-    echo ""
+    echo 
+    echo " Helper Functions:"
+    echo " --------------------------------------------------------------------------------------------------------"
+    echo 
 }
 
 
