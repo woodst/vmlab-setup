@@ -247,11 +247,12 @@ returnCatalog() {
     echo 
     echo " Discrete functions (run by the macro functions above):"
     echo " --------------------------------------------------------------------------------------------------------"
-    echo " clean                          archive artifacts and unmount/remove the remote installation directory"
-    echo " mountInstallDirectory          create a local directory with a remote mount to the log directory"
+    echo " clean                          archive artifacts and unmount/remove the remote installation directory."
+    echo " mountInstallDirectory          create a local directory with a remote mount to the log directory."
     echo " log                            Write to the log file.  See documentation for usage."
-    echo " setupKeyboard                  Set up the local keyboard used during installation"
-    echo " setupTime                      Set System Time, Timezone, use of NTP"
+    echo " setupKeyboard                  Set up the local keyboard used during installation."
+    echo " setupTime                      Set System Time, Timezone, use of NTP."
+    echo " partSetup                      Set up partions according to $partspec and its child scripts."
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
