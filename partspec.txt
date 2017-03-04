@@ -1,0 +1,104 @@
+sgdisk -n 1:2048:16779264 -t 1:8200 -c 1:swap /dev/sdu
+sgdisk -n 2:16781312:17829888 -t 2:EF00 -c 2:boot /dev/sdu
+sgdisk -n 3:17831936:79695872 -t 3:8304 -c 3:root /dev/sdu
+sgdisk -n 4:79697920:163584000 -t 4:8302 -c 4:home /dev/sdu
+sgdisk -n 5:163586048:468862094 -t 5:8300 -c 5:fastdrive /dev/sdu
+
+mkswap --force -L swap /dev/sdu1
+mkfs.fat -F32 -n BOOT /dev/sdu2
+mkfs.ext4 -F -L root /dev/sdu3
+mkfs.ext4 -F -L home /dev/sdu4
+mkfs.ext4 -F -L fastdrive /dev/sdu5
+
+mount -t ext4 -L root /mnt
+
+mkdir /mnt/volumes
+mkdir /mnt/boot
+mkdir /mnt/volumes/secure
+mkdir /mnt/home
+mkdir /mnt/volumes/fastdrive
+
+mount -t ext4 -L home /mnt/home
+mount -t ext4 -L fastdrive /mnt/volumes/fastdrive
+mount -t vfat -L BOOT /mnt/boot
+
+chmod +x install/mdSetup.sh
+./install/mdSetup.sh
+cat /proc/mdstat
+mdadm --detail /dev/md0
+
+mkfs.ext4 -L coldstore /dev/md0
+mkdir /mnt/volumes/coldstore
+mount -t ext4 -L coldstore /mnt/volumes/coldstore
+
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost01 /dev/sda
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost02 /dev/sdb
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost03 /dev/sdc
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost04 /dev/sdd
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost05 /dev/sde
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost06 /dev/sdf
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost07 /dev/sdg
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost08 /dev/sdh
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost09 /dev/sdi
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost10 /dev/sdj
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost11 /dev/sdk
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost12 /dev/sdl
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost13 /dev/sdm
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost14 /dev/sdn
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost15 /dev/sdo
+sgdisk -n 1:2048:1465149134 -t 1:8300 -c 1:ost16 /dev/sdp
+
+mkfs.ext4 -L ost01 /dev/sda1
+mkfs.ext4 -L ost02 /dev/sdb1
+mkfs.ext4 -L ost03 /dev/sdc1
+mkfs.ext4 -L ost04 /dev/sdd1
+mkfs.ext4 -L ost05 /dev/sde1
+mkfs.ext4 -L ost06 /dev/sdf1
+mkfs.ext4 -L ost07 /dev/sdg1
+mkfs.ext4 -L ost08 /dev/sdh1
+mkfs.ext4 -L ost09 /dev/sdi1
+mkfs.ext4 -L ost10 /dev/sdj1
+mkfs.ext4 -L ost11 /dev/sdk1
+mkfs.ext4 -L ost12 /dev/sdl1
+mkfs.ext4 -L ost13 /dev/sdm1
+mkfs.ext4 -L ost14 /dev/sdn1
+mkfs.ext4 -L ost15 /dev/sdo1
+mkfs.ext4 -L ost16 /dev/sdp1
+
+mkdir /mnt/volumes/objectstore
+
+mkdir /mnt/volumes/objectstore/ost01
+mkdir /mnt/volumes/objectstore/ost02
+mkdir /mnt/volumes/objectstore/ost03
+mkdir /mnt/volumes/objectstore/ost04
+mkdir /mnt/volumes/objectstore/ost05
+mkdir /mnt/volumes/objectstore/ost06
+mkdir /mnt/volumes/objectstore/ost07
+mkdir /mnt/volumes/objectstore/ost08
+mkdir /mnt/volumes/objectstore/ost09
+mkdir /mnt/volumes/objectstore/ost10
+mkdir /mnt/volumes/objectstore/ost11
+mkdir /mnt/volumes/objectstore/ost12
+mkdir /mnt/volumes/objectstore/ost13
+mkdir /mnt/volumes/objectstore/ost14
+mkdir /mnt/volumes/objectstore/ost15
+mkdir /mnt/volumes/objectstore/ost16
+
+mount -t ext4 -L ost01 /mnt/volumes/objectstore/ost01
+mount -t ext4 -L ost02 /mnt/volumes/objectstore/ost02
+mount -t ext4 -L ost03 /mnt/volumes/objectstore/ost03
+mount -t ext4 -L ost04 /mnt/volumes/objectstore/ost04
+mount -t ext4 -L ost05 /mnt/volumes/objectstore/ost05
+mount -t ext4 -L ost06 /mnt/volumes/objectstore/ost06
+mount -t ext4 -L ost07 /mnt/volumes/objectstore/ost07
+mount -t ext4 -L ost08 /mnt/volumes/objectstore/ost08
+mount -t ext4 -L ost09 /mnt/volumes/objectstore/ost09
+mount -t ext4 -L ost10 /mnt/volumes/objectstore/ost10
+mount -t ext4 -L ost11 /mnt/volumes/objectstore/ost11
+mount -t ext4 -L ost12 /mnt/volumes/objectstore/ost12
+mount -t ext4 -L ost13 /mnt/volumes/objectstore/ost13
+mount -t ext4 -L ost14 /mnt/volumes/objectstore/ost14
+mount -t ext4 -L ost15 /mnt/volumes/objectstore/ost15
+mount -t ext4 -L ost16 /mnt/volumes/objectstore/ost16
+
+
