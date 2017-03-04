@@ -38,6 +38,11 @@ keymap="us.map.gz"
 # timezone
 timezone="UTC"
 
+# Partition List is the drive by drive partition specification
+# filename.  It shoulbd be placed in the remote install
+# directiory, and must be there before it can be called.
+# See the documentation for schema
+partspec="partspec.txt"
 
 
 # ======================================================
@@ -195,6 +200,33 @@ else
 fi
 }
 
+# =======================================================
+# partSetup
+# -------------------------------------------------------
+# F-070
+# -------------------------------------------------------
+# loads the partition specifcation file (see script
+# data) and sets up partitions on each physical disk
+# per the spcification.
+# =======================================================
+partSetup() {
+    if [[ $(type sgdisk) != "" ]] && test -e "$localdirectory$partspec"
+	echo $localdirectory$partspec
+    then
+	while read -r drive 
+	do
+	    echo "*********************************************************************************"
+	    echo "PartSetup: "${drive}
+	    echo "*********************************************************************************"
+	    echo " "
+            ${drive}
+	done < "$localdirectory$partspec"
+    else
+	echo "Something went wrong with partSetup"
+	return 1
+    fi
+}
+
 
 
 # =======================================================
@@ -215,11 +247,12 @@ returnCatalog() {
     echo 
     echo " Discrete functions (run by the macro functions above):"
     echo " --------------------------------------------------------------------------------------------------------"
-    echo " clean                          archive artifacts and unmount/remove the remote installation directory"
-    echo " mountInstallDirectory          create a local directory with a remote mount to the log directory"
+    echo " clean                          archive artifacts and unmount/remove the remote installation directory."
+    echo " mountInstallDirectory          create a local directory with a remote mount to the log directory."
     echo " log                            Write to the log file.  See documentation for usage."
-    echo " setupKeyboard                  Set up the local keyboard used during installation"
-    echo " setupTime                      Set System Time, Timezone, use of NTP"
+    echo " setupKeyboard                  Set up the local keyboard used during installation."
+    echo " setupTime                      Set System Time, Timezone, use of NTP."
+    echo " partSetup                      Set up partions according to $partspec and its child scripts."
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
@@ -246,6 +279,10 @@ fullSetup() {
 
     # 0030 Set the system time
     log 0030 setupTime "System time set "
+
+    # 0040 Configure Drives and Partitions
+    log 0040 partSetup "Drives are being configured "
+
 
 }
 
