@@ -25,7 +25,7 @@
 # ======================================================
 
 # Installation and logging information
-loglocation="woodst@192.168.1.21:vmlab/install/"
+loglocation="woodst@10.10.30.6:vmlab/install/"
 localdirectory="install/"
 logfilename="setuplog.log.txt"
 mountlist="mountList.txt"
@@ -374,7 +374,7 @@ returnCatalog() {
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
     echo " nuclear                        Flatten the installation and return it to an unconfigured state."
-    echo " 
+    echo
     echo " diskmap                        creates a text file dump of all physical drives on this system"
     echo 
 }
