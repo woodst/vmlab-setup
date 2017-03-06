@@ -25,9 +25,10 @@
 # ======================================================
 
 # Installation and logging information
-loglocation="woodst@192.168.1.21:vmlab/install/"
+loglocation="woodst@10.10.30.6:vmlab/install/"
 localdirectory="install/"
 logfilename="setuplog.log.txt"
+mountlist="mountList.txt"
 
 # keymappath provides a full path and file name
 keymappath="/usr/share/kbd/keymaps/i386/qwerty/us.map.gz"
@@ -44,6 +45,9 @@ timezone="UTC"
 # See the documentation for schema
 partspec="partspec.txt"
 
+# Flatten Phrase - must be typed as the second parameter when calling 
+# the flatten function
+flattenPhrase="antiquing"
 
 # ======================================================
 # mountInstallDirectory
@@ -167,6 +171,14 @@ clean () {
         # unmount and remove the install directory
         umount $localdirectory
         rmdir $localdirectory
+
+	# if there is a $mountlist file in the local directory,
+	# remove that too.
+	if test -w "$mountlist"
+	then
+	    rm -f "$mountlist"
+	fi
+	
     else
         echo "Nothing to clean."
     fi
@@ -227,6 +239,108 @@ partSetup() {
     fi
 }
 
+# =======================================================
+# dismountAll
+# -------------------------------------------------------
+# F-080.1
+# -------------------------------------------------------
+# Unmount the basic vmlab file systems.  Note that these should be any mounts
+# that occur under the /mnt directory. The temporary file $mountlist is used
+# but is writted locally instead of to the installation directory in order to
+# make the function usable without having to mount the installation directory.
+# =======================================================
+dismountAll() {
+    echo "Unmounting file systems..."
+    # Make a list of mountings under the /mnt directory
+    findmnt -l -o "TARGET" | grep /mnt/ > "$mountlist"
+
+    #Read the mount list and dismount everything
+    while read -r part
+    do
+	umount -f ${part}
+    done < "$mountlist"
+}
+
+# =======================================================
+# removePartitions
+# -------------------------------------------------------
+# F-080.2
+# -------------------------------------------------------
+# Prerequisite: Volumes are not mounted.
+# -------------------------------------------------------
+# Flatten the system by restoring all drives to a 
+# zero partitioned state.  Use with caution!
+# =======================================================
+removePartitions() {
+    #
+    for sdsk in $(lsblk --noheadings --output="PKNAME")
+    do        
+        sgdisk -z /dev/$sdsk
+    done 
+}
+
+
+# =======================================================
+# removeMultidisks
+# -------------------------------------------------------
+# F-080.3
+# -------------------------------------------------------
+# Prerequisite: Volumes are not mounted.
+# -------------------------------------------------------
+# Tear down the multidisk volume, overwrite the various
+# superblocks and Zap the partitions.
+# =======================================================
+removeMultidisks() {
+    for mdsk in $(lsblk --output="KNAME" | grep "md" | uniq)
+    do
+	members=$(mdadm --detail /dev/$mdsk | grep -oh "/dev/sd[a-z]")
+        echo "Removing /dev/$mdsk..."
+        mdadm --remove /dev/$mdsk
+        mdadm --stop /dev/$mdsk
+
+        for member in $members
+        do
+            echo "wiping $member"
+            mdadm --zero-superblock $member
+            sgdisk -Z $member
+        done   
+    done
+}
+
+# =======================================================
+# Nuclear
+# -------------------------------------------------------
+# F-080.4
+# -------------------------------------------------------
+# Flatten the system by restoring all drives to a 
+# zero partitioned state.  Use with caution!
+# =======================================================
+nuclear() {
+
+if [[ $(type sgdisk) != "" ]] && test "$1" = "$flattenPhrase"
+then
+    echo "kaboom!"
+
+    # Unmount everything in /mnt
+    unmountAll
+    
+    # clear any Multi-Disk devices
+    removeMultidisks
+    
+    # Clear the physical drives
+    removePartitions
+    
+    # Run the clean() function
+    clean
+
+else
+    echo "You didn't use the command correctly!"
+fi
+
+}
+
+
+
 
 
 # =======================================================
@@ -253,9 +367,14 @@ returnCatalog() {
     echo " setupKeyboard                  Set up the local keyboard used during installation."
     echo " setupTime                      Set System Time, Timezone, use of NTP."
     echo " partSetup                      Set up partions according to $partspec and its child scripts."
+    echo " dismountAll                    Dismount every partition under /mnt."
+    echo " removePartitions               Remove every partition."
+    echo " removeMultidisks               Remove any Multi-Disk Confirurations."
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
+    echo " nuclear                        Flatten the installation and return it to an unconfigured state."
+    echo
     echo " diskmap                        creates a text file dump of all physical drives on this system"
     echo 
 }
