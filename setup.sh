@@ -29,6 +29,7 @@ loglocation="woodst@10.10.30.6:vmlab/install/"
 localdirectory="install/"
 logfilename="setuplog.log.txt"
 mountlist="mountList.txt"
+mirrorlist="mirrorList.txt"
 
 # keymappath provides a full path and file name
 keymappath="/usr/share/kbd/keymaps/i386/qwerty/us.map.gz"
@@ -339,7 +340,46 @@ fi
 
 }
 
+# =======================================================
+# basePackageInstall
+# =======================================================
+# Prerequisit: All drives partitioned and mounted
+# =======================================================
+# Performs an installation of the base Arch Linux
+# system
+# =======================================================
+basePackageInstall() {
+    echo "Installing the base Arch Linux packages... "
 
+    # rename the existing mirror file and fetch the one from
+    # setup that has only local mirrors
+    if test -e "Slocaldirectory$mirrorList"
+    then
+	cp /etc/pacman.d/mirrors /etc/pacman.d/mirrorlist.old
+    else
+	echo "there is no mirror in /etc/pacman.d"
+    fi
+
+    if test -e "$localdirectory$mirrorList"
+    then
+	cp "$localdirectory$mirrorList" /etc/pacman.d/mirrorlist
+    else
+	echo "there is no mirror file in the install directory"
+    fi 
+    
+    # base install
+    pacstrap /mnt base
+
+    # Install extra packages needed into the new root
+    # EFI firmware variable access
+    echo "Installing efivar... "
+    arch-chroot /mnt su root -c "pacman -S efivar --noconfirm"
+
+    # Intel Microcode update (TODO - set up boot partition to use this!)
+    echo "Installing Intel microcode updates... "
+    arch-chroot /mnt su root -c "pacman -S intel-ucode --noconfirm"
+
+}
 
 
 
@@ -370,11 +410,11 @@ returnCatalog() {
     echo " dismountAll                    Dismount every partition under /mnt."
     echo " removePartitions               Remove every partition."
     echo " removeMultidisks               Remove any Multi-Disk Confirurations."
+    echo " basePackageInstall             Install the Arch Linux base packages."
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
     echo " nuclear                        Flatten the installation and return it to an unconfigured state."
-    echo
     echo " diskmap                        creates a text file dump of all physical drives on this system"
     echo 
 }
@@ -402,6 +442,8 @@ fullSetup() {
     # 0040 Configure Drives and Partitions
     log 0040 partSetup "Drives are being configured "
 
+    # 0050 Install base packages
+    log 0050 basePackageInstall "Base Arch Linux Pachages are being installed" 
 
 }
 
