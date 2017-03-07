@@ -29,6 +29,7 @@ loglocation="woodst@10.10.30.6:vmlab/install/"
 localdirectory="install/"
 logfilename="setuplog.log.txt"
 mountlist="mountList.txt"
+mirrorlist="mirrorList.txt"
 
 # keymappath provides a full path and file name
 keymappath="/usr/share/kbd/keymaps/i386/qwerty/us.map.gz"
@@ -48,6 +49,9 @@ partspec="partspec.txt"
 # Flatten Phrase - must be typed as the second parameter when calling 
 # the flatten function
 flattenPhrase="antiquing"
+
+# Host Name
+hostName="vmlab01.woodsnet.org"
 
 # ======================================================
 # mountInstallDirectory
@@ -339,7 +343,88 @@ fi
 
 }
 
+# =======================================================
+# basePackageInstall
+# -------------------------------------------------------
+# F-090
+# -------------------------------------------------------
+# Prerequisit: All drives partitioned and mounted
+# -------------------------------------------------------
+# Performs an installation of the base Arch Linux
+# system
+# =======================================================
+basePackageInstall() {
+    echo "Installing the base Arch Linux packages... "
 
+    # rename the existing mirror file and fetch the one from
+    # setup that has only local mirrors
+    if test -e "Slocaldirectory$mirrorList"
+    then
+	cp /etc/pacman.d/mirrors /etc/pacman.d/mirrorlist.old
+    else
+	echo "there is no mirror in /etc/pacman.d"
+    fi
+
+    if test -e "$localdirectory$mirrorList"
+    then
+	cp "$localdirectory$mirrorList" /etc/pacman.d/mirrorlist
+    else
+	echo "there is no mirror file in the install directory"
+    fi 
+    
+    # base install
+    pacstrap /mnt base
+
+    # Install extra packages needed into the new root
+    # EFI firmware variable access
+    echo "Installing efivar... "
+    arch-chroot /mnt su root -c "pacman -S efivar --noconfirm"
+
+    # Intel Microcode update (TODO - set up boot partition to use this!)
+    echo "Installing Intel microcode updates... "
+    arch-chroot /mnt su root -c "pacman -S intel-ucode --noconfirm"
+
+}
+
+
+# =======================================================
+# configSystem
+# -------------------------------------------------------
+# F-100
+# -------------------------------------------------------
+# Prerequisite: /mnt mountings and basePackageInstall
+# -------------------------------------------------------
+# Configure the new system
+# Configure several settings on the new system rooted 
+# at /mnt
+# =======================================================
+configSystem() {
+    # start with generation of fstab by label
+    genfstab -L /mnt >> /mnt/etc/fstab
+
+    # set the host name
+    echo $hostName > /mnt/etc/hostname
+    echo "127.0.0.1        $hostName.localdomain $hostName" >> /mnt/etc/hosts
+    echo "Host name is $hostName"
+
+    # set time parameter /etc/adjtime for the new root
+    # hwclock does not run as an indirect chroot.
+    hwclock --systohc --utc
+    cp /etc/adjtime /mnt/etc/adjtime
+
+    # set the locale
+    # start with a working backup of the initial file, then
+    # uncomment the locale needed. Do this for every locale 
+    # desired.  Run locale-gen as the new system root.
+    cp /mnt/etc/locale.gen /mnt/etc/locale.gen.backup
+    sed "s/#en_US.UTF-8/en_US.UTF-8/g" /mnt/etc/locale.gen.backup > /mnt/etc/locale.gen
+
+    arch-chroot /mnt su - root -c "locale-gen"
+
+    # and record the choice made
+    echo LANG=en_US.UTF-8 > /mnt/etc/locale.conf
+
+}
 
 
 
@@ -370,11 +455,12 @@ returnCatalog() {
     echo " dismountAll                    Dismount every partition under /mnt."
     echo " removePartitions               Remove every partition."
     echo " removeMultidisks               Remove any Multi-Disk Confirurations."
+    echo " basePackageInstall             Install the Arch Linux base packages."
+    echo " configSystem                   Configure the newly installed base system at /mnt"
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
     echo " nuclear                        Flatten the installation and return it to an unconfigured state."
-    echo
     echo " diskmap                        creates a text file dump of all physical drives on this system"
     echo 
 }
@@ -402,6 +488,11 @@ fullSetup() {
     # 0040 Configure Drives and Partitions
     log 0040 partSetup "Drives are being configured "
 
+    # 0050 Install base packages
+    log 0050 basePackageInstall "Base Arch Linux Pachages are being installed"
+
+    # 0060 Configure System
+    log 0060 configSystem "Configure the new system installed at /mnt"
 
 }
 
