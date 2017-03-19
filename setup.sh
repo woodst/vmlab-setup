@@ -513,6 +513,20 @@ arch-chroot /mnt su - root -c "systemctl enable systemd-resolved"
 
 }
 
+# =======================================================
+# initRAM
+# ----------------------------------------------------
+# F-120
+# -------------------------------------------------------
+# Initialize the RAM image for the kernel, and install it
+# in the /mnt root.
+# =======================================================
+initRAM() {
+
+arch-chroot /mnt su - root -c "mkinitcpio -p linux"
+
+}
+
 
 
 # =======================================================
@@ -545,7 +559,7 @@ returnCatalog() {
     echo " basePackageInstall             Install the Arch Linux base packages."
     echo " configSystem                   Configure the newly installed base system at /mnt"
     echo " configNetwork                  Configure the networking for the newly installed base system at /mnt"
-    echo 
+    echo " initRAM                        Initialize the RAM-based kernel in the new root at /mnt"
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
@@ -585,6 +599,9 @@ fullSetup() {
 
     # 0070 Configure Network
     log 0070 configNetwork "Configure networking for the new system installed at /mnt"
+
+    # 0080 Initialize RAM image
+    log 0080 initRAM "Intializing Kernel RAM image at /mnt"
 
 }
 
