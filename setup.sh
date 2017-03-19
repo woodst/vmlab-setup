@@ -59,12 +59,12 @@ presNetIP="10.10.40.10/24"
 presNetGW="10.10.40.254"
 
 appNetName="wn-application"
-appNetMac="fc:aa:14:de:f7:69"
+appNetMAC="fc:aa:14:de:f7:69"
 appNetIP="10.10.50.10/24"
 appNetGW="10.10.50.254"
 
 dataNetName="wn-data"
-dataNetMac="fc:aa:14:de:f7:6a"
+dataNetMAC="fc:aa:14:de:f7:6a"
 dataNetIP="10.10.60.10/24"
 dataNetGW="10.10.60.254"
 
