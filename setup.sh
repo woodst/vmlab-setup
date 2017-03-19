@@ -620,6 +620,27 @@ configShell() {
 }
 
 
+# =======================================================
+# cleanReboot
+# -------------------------------------------------------
+# F-160
+# -------------------------------------------------------
+# Mop up installation artifacts, eject the DVD, reboot.
+# =======================================================
+cleanReboot() {
+    # Clean up the installation files
+    echo "Cleaning up..."
+    clean
+
+    # Reboot the system
+    clear
+    echo "Installation complete - removing the installation media and rebooting... "
+    umount -l /dev/sr0
+    eject /dev/sr0
+    reboot --poweroff
+}
+
+
 
 # =======================================================
 # returnCatalog
@@ -655,6 +676,7 @@ returnCatalog() {
     echo " setPass                        Set the root password at /mnt"
     echo " configBoot                     Configure the Boot Loader, UEFI, systemd at /mnt"
     echo " configShell                    Configure the Z shell at /mnt"
+    echo " cleanReboot                    Clean up installation files, eject the DVD, reboot."
     echo
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
@@ -704,8 +726,12 @@ fullSetup() {
     # 0100 Set up the boot loader
     log 0100 configBoot "Setting up the boot environment "
 
-    # 0010 Set up the Z shell
-    log 0011 configShell "Configuring the interactive Z shell "
+    # 0110 Set up the Z shell
+    log 0110 configShell "Configuring the interactive Z shell "
+
+    # 9999 Set up the Z shell
+    log 9999 cleanReboot "Cleaning up installation and rebootiing "
+
 }
 
 
