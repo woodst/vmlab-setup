@@ -76,6 +76,12 @@ manageNetGW="10.10.70.254"
 # Root Password
 rootPass=Kepler01
 
+# Boot Loader path
+bootfilepath="/mnt/boot/loader/entries"
+
+# Boot Loader filename
+bootfile="arch.conf"
+
 # ======================================================
 # mountInstallDirectory
 # ------------------------------------------------------
@@ -544,6 +550,45 @@ arch-chroot /mnt su - root -c "echo root:$rootPass | chpasswd"
 }
 
 
+# =======================================================
+# configBoot
+# -------------------------------------------------------
+# F-140
+# -------------------------------------------------------
+# Set up the boot loader, UEFI and systemd at /mnt
+# =======================================================
+configBoot() {
+
+    # add read only mounting of efivars to the new system 
+    # fstab, and then make sure it is mounted under chroot
+    echo 
+    echo "efivarfs    /sys/firmware/efi/efivars  efivarfs  ro, nosuid, nodev, noexec, noatime 0 0" >> /mnt/etc/fstab
+    arch-chroot /mnt su - root -c "mount -t efivarfs efivarfs /sys/firmware/efi/efivars"
+
+    # Install bootctl
+    arch-chroot /mnt su - root -c "bootctl install"
+
+    # Install Intel microcode 
+    # (TODO: Investigate conflict with base install)
+    #arch-chroot /mnt su - root -c "pacman -S intel-ucode"
+
+    # Get the PARTUID of the root partion
+    rootpart=$(blkid -L root)
+    partuuid=$(blkid -s PARTUUID -o value $rootpart)
+
+    # Write the arch.conf boot loader config file
+    mkdir -p $bootfilepath
+    echo "title Arch Linux" >> $bootfilepath/$bootfile
+    echo "linux /vmlinuz-linux" >> $bootfilepath/$bootfile
+    # echo "initrd /intel-ucode.img" >> $bootfilepath/$bootfile
+    echo "initrd /initramfs-linux.img" >> $bootfilepath/$bootfile
+    echo "options root=PARTUUID=$partuuid rw" >> $bootfilepath/$bootfile
+
+    # Screen refresh
+    clear
+}
+
+
 
 # =======================================================
 # returnCatalog
@@ -577,6 +622,7 @@ returnCatalog() {
     echo " configNetwork                  Configure the networking for the newly installed base system at /mnt"
     echo " initRAM                        Initialize the RAM-based kernel in the new root at /mnt"
     echo " setPass                        Set the root password at /mnt"
+    echo " configBoot                     Configure the Boot Loader, UEFI, systemd"
     echo
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
@@ -622,6 +668,9 @@ fullSetup() {
 
     # 0090 Set the root password for the new system
     log 0090 setPass "Setting the root password "
+
+    # 0100 Set up the boot loader
+    log 0100 configBoot "Setting up the boot environment "
 }
 
 
