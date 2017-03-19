@@ -2,7 +2,7 @@
 
 # ======================================================
 # setup.sh
-# version 0.1.0
+# version 0.6.0
 # ------------------------------------------------------
 #
 # vmlab setup script
@@ -72,6 +72,9 @@ manageNetName="wn-manage"
 manageNetMAC="fc:aa:14:de:f7:6b"
 manageNetIP="10.10.70.10/24"
 manageNetGW="10.10.70.254"
+
+# Root Password
+rootPass=Kepler01
 
 # ======================================================
 # mountInstallDirectory
@@ -515,7 +518,7 @@ arch-chroot /mnt su - root -c "systemctl enable systemd-resolved"
 
 # =======================================================
 # initRAM
-# ----------------------------------------------------
+# -------------------------------------------------------
 # F-120
 # -------------------------------------------------------
 # Initialize the RAM image for the kernel, and install it
@@ -524,6 +527,19 @@ arch-chroot /mnt su - root -c "systemctl enable systemd-resolved"
 initRAM() {
 
 arch-chroot /mnt su - root -c "mkinitcpio -p linux"
+
+}
+
+# =======================================================
+# setPass
+# -------------------------------------------------------
+# F-130
+# -------------------------------------------------------
+# Set the root password at /mnt
+# =======================================================
+setPass() {
+
+arch-chroot /mnt su - root -c "echo root:$rootPass | chpasswd"
 
 }
 
@@ -560,7 +576,8 @@ returnCatalog() {
     echo " configSystem                   Configure the newly installed base system at /mnt"
     echo " configNetwork                  Configure the networking for the newly installed base system at /mnt"
     echo " initRAM                        Initialize the RAM-based kernel in the new root at /mnt"
-    echo 
+    echo " setPass                        Set the root password at /mnt"
+    echo
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
     echo " nuclear                        Flatten the installation and return it to an unconfigured state."
@@ -603,6 +620,8 @@ fullSetup() {
     # 0080 Initialize RAM image
     log 0080 initRAM "Intializing Kernel RAM image at /mnt"
 
+    # 0090 Set the root password for the new system
+    log 0090 setPass "Setting the root password "
 }
 
 
