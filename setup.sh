@@ -25,7 +25,7 @@
 # ======================================================
 
 # Installation and logging information
-loglocation="woodst@10.10.30.6:vmlab/install/"
+loglocation="woodst@10.10.100.100:vmlab/install/"
 localdirectory="install/"
 logfilename="setuplog.log.txt"
 mountlist="mountList.txt"
@@ -465,43 +465,43 @@ echo 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="'$manageNetMAC'", NAME="'
 
 # Write the config file for wn-presentation
 echo '[Match]' >> /mnt/etc/systemd/network/$presNetName.network
-echo 'Name='$presNetName >> /mnt/etc/systemd/network/$presNetName.network
+echo 'Name='"$presNetName" >> /mnt/etc/systemd/network/$presNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$presNetName.network
 echo '[Network]' >> /mnt/etc/systemd/network/$presNetName.network
-echo 'Address=$presNetIP' >> /mnt/etc/systemd/network/$presNetName.network
+echo 'Address='"$presNetIP" >> /mnt/etc/systemd/network/$presNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$presNetName.network
 echo '[Route]' >> /mnt/etc/systemd/network/$presNetName.network
-echo 'Gateway=$presNetGW' >> /mnt/etc/systemd/network/$presNetName.network
+echo 'Gateway='"$presNetGW" >> /mnt/etc/systemd/network/$presNetName.network
 
 # Write the config file for wn-application
 echo '[Match]' >> /mnt/etc/systemd/network/$appNetName.network
-echo 'Name='$appNetName >> /mnt/etc/systemd/network/$appNetName.network
+echo 'Name='"$appNetName" >> /mnt/etc/systemd/network/$appNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$appNetName.network
 echo '[Network]' >> /mnt/etc/systemd/network/$appNetName.network
-echo 'Address=$appNetIP' >> /mnt/etc/systemd/network/$appNetName.network
+echo 'Address='"$appNetIP" >> /mnt/etc/systemd/network/$appNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$appNetName.network
 echo '[Route]' >> /mnt/etc/systemd/network/$appNetName.network
-echo 'Gateway=$appNetGW' >> /mnt/etc/systemd/network/$appNetName.network
+echo 'Gateway='"$appNetGW" >> /mnt/etc/systemd/network/$appNetName.network
 
 # Write the config file for wn-data
 echo '[Match]' >> /mnt/etc/systemd/network/$dataNetName.network
-echo 'Name='$dataNetName >> /mnt/etc/systemd/network/$dataNetName.network
+echo 'Name='"$dataNetName" >> /mnt/etc/systemd/network/$dataNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$dataNetName.network
 echo '[Network]' >> /mnt/etc/systemd/network/$dataNetName.network
-echo 'Address=$dataNetIP' >> /mnt/etc/systemd/network/$dataNetName.network
+echo 'Address='"$dataNetIP" >> /mnt/etc/systemd/network/$dataNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$dataNetName.network
 echo '[Route]' >> /mnt/etc/systemd/network/$dataNetName.network
-echo 'Gateway=$dataNetGW' >> /mnt/etc/systemd/network/$dataNetName.network
+echo 'Gateway='"$dataNetGW" >> /mnt/etc/systemd/network/$dataNetName.network
 
 # Write the config file for wn-management
 echo '[Match]' >> /mnt/etc/systemd/network/$manageNetName.network
-echo 'Name='$manageNetName >> /mnt/etc/systemd/network/$manageNetName.network
+echo 'Name='"$manageNetName" >> /mnt/etc/systemd/network/$manageNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$manageNetName.network
 echo '[Network]' >> /mnt/etc/systemd/network/$manageNetName.network
-echo 'Address=$manageNetIP' >> /mnt/etc/systemd/network/$manageNetName.network
+echo 'Address='"$manageNetIP" >> /mnt/etc/systemd/network/$manageNetName.network
 echo ' ' >> /mnt/etc/systemd/network/$manageNetName.network
 echo '[Route]' >> /mnt/etc/systemd/network/$manageNetName.network
-echo 'Gateway=$manageNetGW' >> /mnt/etc/systemd/network/$manageNetName.network
+echo 'Gateway='"$manageNetGW" >> /mnt/etc/systemd/network/$manageNetName.network
 
 # Write the Google name servers to resolve.conf
 echo 'nameserver 8.8.8.8' >> /mnt/etc/resolv.conf
