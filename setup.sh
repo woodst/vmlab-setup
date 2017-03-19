@@ -589,6 +589,37 @@ configBoot() {
 }
 
 
+# =======================================================
+# configShell
+# -------------------------------------------------------
+# F-150
+# -------------------------------------------------------
+# Set up the Z shell at /mnt
+# =======================================================
+configShell() {
+
+    # Use the FISH shell
+    arch-chroot /mnt su - root -c "pacman -S fish --noconfirm"
+    arch-chroot /mnt su - root -c "chsh -s /usr/bin/fish"
+
+    # Set up and enable secure shell for remote login
+    # Note that we will be working as root for a while
+    # until the OpenStack install is complete, so only
+    # root is enabled here.
+
+    # Refresh the openSSH install
+    arch-chroot /mnt su - root -c "pacman -S openssh --noconfirm"
+
+    # Permit root
+    echo "AllowUsers root" >> /mnt/etc/ssh/sshd_config
+    echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
+
+    # set the service
+    arch-chroot /mnt su - root -c "systemctl enable sshd"
+
+}
+
+
 
 # =======================================================
 # returnCatalog
@@ -622,7 +653,8 @@ returnCatalog() {
     echo " configNetwork                  Configure the networking for the newly installed base system at /mnt"
     echo " initRAM                        Initialize the RAM-based kernel in the new root at /mnt"
     echo " setPass                        Set the root password at /mnt"
-    echo " configBoot                     Configure the Boot Loader, UEFI, systemd"
+    echo " configBoot                     Configure the Boot Loader, UEFI, systemd at /mnt"
+    echo " configShell                    Configure the Z shell at /mnt"
     echo
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
@@ -671,6 +703,9 @@ fullSetup() {
 
     # 0100 Set up the boot loader
     log 0100 configBoot "Setting up the boot environment "
+
+    # 0010 Set up the Z shell
+    log 0011 configShell "Configuring the interactive Z shell "
 }
 
 
