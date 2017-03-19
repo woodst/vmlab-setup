@@ -50,8 +50,28 @@ partspec="partspec.txt"
 # the flatten function
 flattenPhrase="antiquing"
 
-# Host Name
-hostName="vmlab01.woodsnet.org"
+# Networking and Host Name
+hostName="vmlab01.home.woodsnet.org"
+
+presNetName="wn-presentation"
+presNetMAC="fc:aa:14:de:f7:68"
+presNetIP="10.10.40.10/24"
+presNetGW="10.10.40.254"
+
+appNetName="wn-application"
+appNetMac="fc:aa:14:de:f7:69"
+appNetIP="10.10.50.10/24"
+appNetGW="10.10.50.254"
+
+dataNetName="wn-data"
+dataNetMac="fc:aa:14:de:f7:6a"
+dataNetIP="10.10.60.10/24"
+dataNetGW="10.10.60.254"
+
+manageNetName="wn-manage"
+manageNetMAC="fc:aa:14:de:f7:6b"
+manageNetIP="10.10.70.10/24"
+manageNetGW="10.10.70.254"
 
 # ======================================================
 # mountInstallDirectory
@@ -427,6 +447,73 @@ configSystem() {
 }
 
 
+# =======================================================
+# configNetwork
+# -------------------------------------------------------
+# F-110
+# -------------------------------------------------------
+# Prerequisite: /mnt mountings and basePackageInstall
+# -------------------------------------------------------
+# Configure the new network interfaces on /mnt
+# =======================================================
+configNetwork() {
+# write the network config files to be used by systemd
+echo 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="'$presNetMAC'", NAME="'$presNetName'"' >> /mnt/etc/udev/rules.d/10-network.rules
+echo 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="'$appNetMAC'", NAME="'$appNetName'"' >> /mnt/etc/udev/rules.d/10-network.rules
+echo 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="'$dataNetMAC'", NAME="'$dataNetName'"' >> /mnt/etc/udev/rules.d/10-network.rules
+echo 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="'$manageNetMAC'", NAME="'$manageNetName'"' >> /mnt/etc/udev/rules.d/10-network.rules
+
+# Write the config file for wn-presentation
+echo '[Match]' >> /mnt/etc/systemd/network/$presNetName.network
+echo 'Name='$presNetName >> /mnt/etc/systemd/network/$presNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$presNetName.network
+echo '[Network]' >> /mnt/etc/systemd/network/$presNetName.network
+echo 'Address=$presNetIP' >> /mnt/etc/systemd/network/$presNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$presNetName.network
+echo '[Route]' >> /mnt/etc/systemd/network/$presNetName.network
+echo 'Gateway=$presNetGW' >> /mnt/etc/systemd/network/$presNetName.network
+
+# Write the config file for wn-application
+echo '[Match]' >> /mnt/etc/systemd/network/$appNetName.network
+echo 'Name='$appNetName >> /mnt/etc/systemd/network/$appNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$appNetName.network
+echo '[Network]' >> /mnt/etc/systemd/network/$appNetName.network
+echo 'Address=$appNetIP' >> /mnt/etc/systemd/network/$appNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$appNetName.network
+echo '[Route]' >> /mnt/etc/systemd/network/$appNetName.network
+echo 'Gateway=$appNetGW' >> /mnt/etc/systemd/network/$appNetName.network
+
+# Write the config file for wn-data
+echo '[Match]' >> /mnt/etc/systemd/network/$dataNetName.network
+echo 'Name='$dataNetName >> /mnt/etc/systemd/network/$dataNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$dataNetName.network
+echo '[Network]' >> /mnt/etc/systemd/network/$dataNetName.network
+echo 'Address=$dataNetIP' >> /mnt/etc/systemd/network/$dataNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$dataNetName.network
+echo '[Route]' >> /mnt/etc/systemd/network/$dataNetName.network
+echo 'Gateway=$dataNetGW' >> /mnt/etc/systemd/network/$dataNetName.network
+
+# Write the config file for wn-management
+echo '[Match]' >> /mnt/etc/systemd/network/$manageNetName.network
+echo 'Name='$manageNetName >> /mnt/etc/systemd/network/$manageNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$manageNetName.network
+echo '[Network]' >> /mnt/etc/systemd/network/$manageNetName.network
+echo 'Address=$manageNetIP' >> /mnt/etc/systemd/network/$manageNetName.network
+echo ' ' >> /mnt/etc/systemd/network/$manageNetName.network
+echo '[Route]' >> /mnt/etc/systemd/network/$manageNetName.network
+echo 'Gateway=$manageNetGW' >> /mnt/etc/systemd/network/$manageNetName.network
+
+# Write the Google name servers to resolve.conf
+echo 'nameserver 8.8.8.8' >> /mnt/etc/resolv.conf
+echo 'nameserver 8.8.8.4' >> /mnt/etc/resolv.conf
+
+# Ensure the network is active on reboot
+arch-chroot /mnt su - root -c "systemctl enable systemd-networkd"
+arch-chroot /mnt su - root -c "systemctl enable systemd-resolved"
+
+}
+
+
 
 # =======================================================
 # returnCatalog
@@ -457,6 +544,8 @@ returnCatalog() {
     echo " removeMultidisks               Remove any Multi-Disk Confirurations."
     echo " basePackageInstall             Install the Arch Linux base packages."
     echo " configSystem                   Configure the newly installed base system at /mnt"
+    echo " configNetwork                  Configure the networking for the newly installed base system at /mnt"
+    echo 
     echo 
     echo " Helper Functions:"
     echo " --------------------------------------------------------------------------------------------------------"
@@ -493,6 +582,9 @@ fullSetup() {
 
     # 0060 Configure System
     log 0060 configSystem "Configure the new system installed at /mnt"
+
+    # 0070 Configure Network
+    log 0070 configNetwork "Configure networking for the new system installed at /mnt"
 
 }
 
