@@ -82,6 +82,13 @@ bootfilepath="/mnt/boot/loader/entries"
 # Boot Loader filename
 bootfile="arch.conf"
 
+# Users
+# Add users to the list in the form ["username"]=password.
+declare -A userList
+
+userList["woodst"]=Kepler01
+userList+=( ["stack"]=LiveHorse01  ["keystone"]=LiveHorse02 )
+
 # ======================================================
 # mountInstallDirectory
 # ------------------------------------------------------
@@ -682,6 +689,26 @@ installSupplemental() {
 }
 
 
+# =======================================================
+# createUsers
+# -------------------------------------------------------
+# F-180
+# -------------------------------------------------------
+# Create new administrative users and OpenStack service
+# users at /mnt.
+# NOTE: requires bash v4 or later to support declare -A
+# =======================================================
+createUsers() {
+
+    for user in ${!userList[@]}
+    do
+	# create each user from the user list in configuration
+	arch-chroot /mnt su - root -c "useradd ${user} --groups wheel --create-home --shell  /usr/bin/fish --user-group --password ${userList[${user}]}"
+
+    done
+    
+}
+
 
 # =======================================================
 # returnCatalog
@@ -718,6 +745,7 @@ returnCatalog() {
     echo " setPass                        Set the root password at /mnt"
     echo " configBoot                     Configure the Boot Loader, UEFI, systemd at /mnt"
     echo " configShell                    Configure the Z shell at /mnt"
+    echo " createUsers                    Create administrative users and OpenStack service accounts."
     echo " cleanReboot                    Clean up installation files, eject the DVD, reboot."
     echo
     echo " Helper Functions:"
@@ -773,6 +801,9 @@ fullSetup() {
 
     # 0110 Set up the Z shell
     log 0110 configShell "Configuring the interactive Z shell "
+
+    # 0120 Create new system users
+    log 0120 createUsers "Creating Administrative and OpenStack accounts "
 
     # 9999 Set up the Z shell
     log 9999 cleanReboot "Cleaning up installation and rebootiing "
