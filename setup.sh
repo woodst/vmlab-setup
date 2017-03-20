@@ -2,7 +2,7 @@
 
 # ======================================================
 # setup.sh
-# version 0.6.0
+# version 1.0.0
 # ------------------------------------------------------
 #
 # vmlab setup script
@@ -81,6 +81,13 @@ bootfilepath="/mnt/boot/loader/entries"
 
 # Boot Loader filename
 bootfile="arch.conf"
+
+# Users
+# Add users to the list in the form ["username"]=password.
+declare -A userList
+
+userList["woodst"]=Kepler01
+userList+=( ["stack"]=LiveHorse01  ["keystone"]=LiveHorse02 )
 
 # ======================================================
 # mountInstallDirectory
@@ -641,6 +648,67 @@ cleanReboot() {
 }
 
 
+# =======================================================
+# installSupplemental
+# -------------------------------------------------------
+# F-170
+# -------------------------------------------------------
+# Install supplemental packages, see the individual
+# comments for each.
+# =======================================================
+installSupplemental() {
+
+    # Install git
+    echo "Installing git..."
+    arch-chroot /mnt su - root -c "pacman -S git --noconfirm"
+
+    # Install emacs
+    echo "installing emacs..."
+    arch-chroot /mnt su - root -c "pacman -S emacs --noconfirm"
+
+    # Install gpt fdisk utilities to get sgdisk
+    echo "installing gptfdisk..."
+    arch-chroot /mnt su - root -c "pacman -S gptfdisk --noconfirm"
+
+    # Install python
+    echo "installing python..."
+    arch-chroot /mnt su - root -c "pacman -S python --noconfirm"
+
+    # Install django
+    echo "installing django..."
+    arch-chroot /mnt su - root -c "pacman -S python-django --noconfirm"
+
+    # install lsb-release
+    echo "installing lsb-release..."
+    arch-chroot /mnt su - root -c "pacman -S lsb-release --noconfirm"
+
+    # install sudo
+    echo "installing sudo..."
+    arch-chroot /mnt su - root -c "pacman -S sudo --noconfirm"
+    
+}
+
+
+# =======================================================
+# createUsers
+# -------------------------------------------------------
+# F-180
+# -------------------------------------------------------
+# Create new administrative users and OpenStack service
+# users at /mnt.
+# NOTE: requires bash v4 or later to support declare -A
+# =======================================================
+createUsers() {
+
+    for user in ${!userList[@]}
+    do
+	# create each user from the user list in configuration
+	arch-chroot /mnt su - root -c "useradd ${user} --groups wheel --create-home --shell  /usr/bin/fish --user-group --password ${userList[${user}]}"
+
+    done
+    
+}
+
 
 # =======================================================
 # returnCatalog
@@ -670,12 +738,14 @@ returnCatalog() {
     echo " removePartitions               Remove every partition."
     echo " removeMultidisks               Remove any Multi-Disk Confirurations."
     echo " basePackageInstall             Install the Arch Linux base packages."
+    echo " installSupplemental            Install additional needed packages to /mnt"
     echo " configSystem                   Configure the newly installed base system at /mnt"
     echo " configNetwork                  Configure the networking for the newly installed base system at /mnt"
     echo " initRAM                        Initialize the RAM-based kernel in the new root at /mnt"
     echo " setPass                        Set the root password at /mnt"
     echo " configBoot                     Configure the Boot Loader, UEFI, systemd at /mnt"
     echo " configShell                    Configure the Z shell at /mnt"
+    echo " createUsers                    Create administrative users and OpenStack service accounts."
     echo " cleanReboot                    Clean up installation files, eject the DVD, reboot."
     echo
     echo " Helper Functions:"
@@ -711,6 +781,9 @@ fullSetup() {
     # 0050 Install base packages
     log 0050 basePackageInstall "Base Arch Linux Pachages are being installed"
 
+    # 0055 Install supplemental packages
+    log 0055 installSupplemental "Supplemental Arch Linux Pachages are being installed"
+
     # 0060 Configure System
     log 0060 configSystem "Configure the new system installed at /mnt"
 
@@ -728,6 +801,9 @@ fullSetup() {
 
     # 0110 Set up the Z shell
     log 0110 configShell "Configuring the interactive Z shell "
+
+    # 0120 Create new system users
+    log 0120 createUsers "Creating Administrative and OpenStack accounts "
 
     # 9999 Set up the Z shell
     log 9999 cleanReboot "Cleaning up installation and rebootiing "
