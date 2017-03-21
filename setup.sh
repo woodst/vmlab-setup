@@ -703,7 +703,9 @@ createUsers() {
     for user in ${!userList[@]}
     do
 	# create each user from the user list in configuration
-	arch-chroot /mnt su - root -c "useradd ${user} --groups wheel --create-home --shell  /usr/bin/fish --user-group --password ${userList[${user}]}"
+	arch-chroot /mnt su - root -c "useradd ${user} --groups wheel --create-home --shell  /usr/bin/fish --user-group "
+	userPass=${userList[${user}]}
+	arch-chroot /mnt su - root -c "echo ${user}:$userPass | chpasswd"
 
     done
     
